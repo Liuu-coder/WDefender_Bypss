@@ -21,8 +21,7 @@ usando hardware breakpoints (DR0-DR7) con la variante NtContinue para evitar ETW
 - 03_compilado/     DLL compilada
 - 04_logs/          Capturas de teclado
 - 05_capturas/      Screenshots de cada fase
-- 06_presentacion/  Material para conferencia
-- 99_borradores/    Pruebas descartadas
+
 
 ## Fases
 - [ ] Fase 1: Archivos base y bitácora
@@ -31,7 +30,7 @@ usando hardware breakpoints (DR0-DR7) con la variante NtContinue para evitar ETW
 - [ ] Fase 4: Compilar DLL e integrar con Python
 - [ ] Fase 5: Exfiltración por Telegram
 - [ ] Fase 6: Medición con Defender activo
-- [ ] Fase 7: Ensayo de conferencia
+
 
 ## Advertencia
 Investigación educativa en sistema propio. No usar en sistemas de terceros.
